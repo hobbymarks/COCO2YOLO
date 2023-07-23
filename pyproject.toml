@@ -6,9 +6,13 @@ authors = ["hobbymarks <ihobbymarks@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
 yapf = "^0.40.1"
 isort = "^5.12.0"
+jupyterlab = "^4.0.3"
+jupyterlab-code-formatter = "^2.2.1"
+jupyterlab-execute-time = "^3.0.0"
+pyinstaller = "^5.13.0"
 
 
 [build-system]
