@@ -13,6 +13,7 @@ jupyterlab = "^4.0.3"
 jupyterlab-code-formatter = "^2.2.1"
 jupyterlab-execute-time = "^3.0.0"
 pyinstaller = "^5.13.0"
+pycocotools = "^2.0.6"
 
 
 [build-system]
