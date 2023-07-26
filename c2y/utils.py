@@ -161,7 +161,7 @@ class Xcoco:
         out_text = ""
         for ann in self._coco.imgToAnns[img_id]:
             _rlt = self._bbox_2_yolo(ann["bbox"], img_w, img_h)
-            out_text += f"{ann['category_id']}"
+            out_text += f"{int(ann['category_id'])-1}"
             for _r in _rlt:
                 out_text += f" {_r:.6f}"
             out_text += "\n"
