@@ -2,7 +2,7 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.fontFamily": "IntelOne Mono",
   "editor.fontLigatures": true,
-  "editor.fontSize": 15,
+  "editor.fontSize": 14,
   "editor.matchBrackets": "always",
   "editor.rulers": [
     79,
@@ -29,6 +29,6 @@
   "python.formatting.provider": "none",
   "python.formatting.blackArgs": [
     "--line-length",
-    "80"
+    "79"
   ]
 }
