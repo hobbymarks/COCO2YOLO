@@ -15,6 +15,10 @@ jupyterlab-execute-time = "^3.0.0"
 pyinstaller = "^5.13.0"
 pycocotools = "^2.0.6"
 pyyaml = "^6.0.1"
+fire = "^0.5.0"
+pytest = "^7.4.0"
+coverage = "^7.2.7"
+loguru = "^0.7.0"
 
 
 [build-system]
