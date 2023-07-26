@@ -7,6 +7,7 @@ import shutil
 from typing import Any, Optional
 
 import yaml
+from loguru import logger
 from pycocotools.coco import COCO
 
 
@@ -17,53 +18,125 @@ class Xcoco:
 
     def __init__(
         self,
-        coco_annotation_path: Optional[str] = None,
-        coco_images_dir_path: Optional[str] = None,
-        output_dir_path: Optional[str] = None,
+        coco_ann_path: Optional[str] = None,
+        coco_imgs_dir: Optional[str] = None,
+        yolo_cfg_yaml: Optional[str] = None,
+        output_dir: Optional[str] = None,
     ) -> None:
         self._coco = None
-        self.coco_annotaions_path = None
-        self.out_dir = None
-        self._coco_images_dir = None
+        self._coco_ann_path = None
+        self._output_dir = None
+        self._coco_imgs_dir = None
         self._yolo_labels_dir = None
         self._yolo_images_dir = None
-        self.set_coco_annotation_path(ann_path=coco_annotation_path)
-        self.set_coco_images_dir_path(coco_images_dir_path=coco_images_dir_path)
-        self.set_output_dir_path(output_dir_path=output_dir_path)
+        self._yolo_cfg_yaml_path = None
+        self.coco_ann_path = coco_ann_path
+        self.coco_imgs_dir = coco_imgs_dir
+        self.output_dir = output_dir
+        self.yolo_cfg_yaml_path = yolo_cfg_yaml
 
-    def set_coco_annotation_path(self, ann_path: str):
+    @property
+    def coco(self):
+        """
+        coco getter
+        """
+        return self._coco
+
+    @property
+    def coco_ann_path(self):
+        """
+        coco annotaions path getter
+        """
+        return self._coco_ann_path
+
+    @coco_ann_path.setter
+    def coco_ann_path(self, ann_path: str):
         """
         set annoation file path
         """
-        self.coco_annotaions_path = ann_path
-        if os.path.exists(self.coco_annotaions_path):
-            self._coco = COCO(self.coco_annotaions_path)
+        if (
+            ann_path is not None
+            and os.path.exists(ann_path)
+            and os.path.isfile(ann_path)
+        ):
+            self._coco_ann_path = ann_path
+            self._coco = COCO(self._coco_ann_path)
 
-    def set_coco_images_dir_path(
+    @property
+    def coco_imgs_dir(self):
+        """
+        coco images directory path getter
+        """
+        return self._coco_imgs_dir
+
+    @coco_imgs_dir.setter
+    def coco_imgs_dir(
         self,
-        coco_images_dir_path: Optional[str] = None,
+        coco_imgs_dir: Optional[str] = None,
     ):
         """
         set images directory path
         """
-        if coco_images_dir_path is not None and os.path.isdir(
-            coco_images_dir_path
-        ):
-            self._coco_images_dir = coco_images_dir_path
+        if coco_imgs_dir is not None and os.path.isdir(coco_imgs_dir):
+            self._coco_imgs_dir = coco_imgs_dir
 
-    def set_output_dir_path(self, output_dir_path: Optional[str] = None):
+    @property
+    def yolo_cfg_yaml_path(self):
+        """
+        yolo yaml config path getter
+        """
+        return self._yolo_cfg_yaml_path
+
+    @yolo_cfg_yaml_path.setter
+    def yolo_cfg_yaml_path(
+        self,
+        cfg_yaml_path: Optional[str] = None,
+    ):
+        """
+        set yolo yaml config path
+        """
+        if cfg_yaml_path is not None:
+            if os.path.exists(cfg_yaml_path):
+                logger.warning(f"Path exist, be overwritten:{cfg_yaml_path}")
+            self._yolo_cfg_yaml_path = cfg_yaml_path
+        else:
+            self._yolo_cfg_yaml_path = os.path.join(self.output_dir, "yolo.yml")
+
+    @property
+    def output_dir(self):
+        """
+        output directory path getter
+        """
+        return self._output_dir
+
+    @output_dir.setter
+    def output_dir(self, output_dir: Optional[str] = None):
         """
         set output directory path
         """
-        if output_dir_path is None:
-            self.out_dir = "./"
-        elif os.path.isdir(output_dir_path):
-            self.out_dir = output_dir_path
+        if output_dir is None:
+            self._output_dir = "./"
+        elif os.path.isdir(output_dir):
+            self._output_dir = output_dir
         else:
-            raise Exception(f"{output_dir_path}")
+            raise Exception(f"{output_dir}")
 
-        self._yolo_labels_dir = os.path.join(self.out_dir, "labels")
-        self._yolo_images_dir = os.path.join(self.out_dir, "images")
+        self._yolo_labels_dir = os.path.join(self._output_dir, "labels")
+        self._yolo_images_dir = os.path.join(self._output_dir, "images")
+
+    @property
+    def yolo_labels_dir(self):
+        """
+        yolo labels directory path getter
+        """
+        return self._yolo_labels_dir
+
+    @property
+    def yolo_images_dir(self):
+        """
+        yolo images directory path getter
+        """
+        return self._yolo_images_dir
 
     def _bbox_2_yolo(self, bbox, img_w, img_h):
         loc_x, loc_y, bx_w, bx_h = bbox[0], bbox[1], bbox[2], bbox[3]
@@ -118,12 +191,16 @@ class Xcoco:
         """
         write images to yolo datasets
         """
+        if self.coco_imgs_dir is None or not os.path.exists(self.coco_imgs_dir):
+            logger.error("images directory path not set")
+            return
+
         if not os.path.exists(self._yolo_images_dir):
             os.mkdir(self._yolo_images_dir)
 
         for img_id in self._coco.getImgIds():
             source_path = os.path.join(
-                self._coco_images_dir, self._coco.imgs[img_id]["file_name"]
+                self._coco_imgs_dir, self._coco.imgs[img_id]["file_name"]
             )
             shutil.copy(source_path, self._yolo_images_dir)
 
@@ -137,12 +214,14 @@ class Xcoco:
             for cid in self._coco.getCatIds()
         }
 
-        with open(
-            os.path.join(self.out_dir, "coco.yml"), "w", encoding="UTF-8"
-        ) as f_handler:
+        with open(self.yolo_cfg_yaml_path, "w", encoding="UTF-8") as f_handler:
             yaml.dump(yaml_content_dict, f_handler)
 
     def __call__(self) -> Any:
+        if self.coco is None:
+            logger.error("is None")
+            return
+
         self.write_labels()
         self.write_images()
         self.write_yaml()
