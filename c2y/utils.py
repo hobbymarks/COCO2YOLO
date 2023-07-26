@@ -180,12 +180,15 @@ class Xcoco:
                 os.path.splitext(self._coco.imgs[img_id]["file_name"])[0]
                 + ".txt"
             )
+            _txt = self._img_to_labels(img_id=img_id)
+            if _txt == "":
+                continue
             with open(
                 os.path.join(self._yolo_labels_dir, fname),
                 "w",
                 encoding="UTF-8",
             ) as f_handler:
-                f_handler.write(self._img_to_labels(img_id=img_id))
+                f_handler.write(_txt)
 
     def write_images(self):
         """
