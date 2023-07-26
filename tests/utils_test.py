@@ -23,7 +23,7 @@ def test_xcoco():
     assert xcoco.yolo_images_dir is not None
     xcoco()
 
-    xcoco = Xcoco(coco_ann_path=package / "edgeshots" / "annotations")
+    xcoco = Xcoco(ann_path=package / "edgeshots" / "annotations")
     assert xcoco.coco_ann_path is None
     assert xcoco.output_dir is not None
     assert xcoco.coco is None
@@ -33,7 +33,7 @@ def test_xcoco():
     xcoco()
 
     xcoco = Xcoco(
-        coco_ann_path=package
+        ann_path=package
         / "edgeshots"
         / "annotations"
         / "instances_default.json"
@@ -56,11 +56,11 @@ def test_xcoco():
         os.remove(xcoco.yolo_cfg_yaml_path)
 
     xcoco = Xcoco(
-        coco_ann_path=package
+        ann_path=package
         / "edgeshots"
         / "annotations"
         / "instances_default.json",
-        coco_imgs_dir=package / "edgeshots" / "images",
+        imgs_dir=package / "edgeshots" / "images",
     )
     assert xcoco.coco_ann_path is not None
     assert xcoco.output_dir is not None

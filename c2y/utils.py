@@ -18,8 +18,8 @@ class Xcoco:
 
     def __init__(
         self,
-        coco_ann_path: Optional[str] = None,
-        coco_imgs_dir: Optional[str] = None,
+        ann_path: Optional[str] = None,
+        imgs_dir: Optional[str] = None,
         yolo_cfg_yaml: Optional[str] = None,
         output_dir: Optional[str] = None,
     ) -> None:
@@ -30,8 +30,8 @@ class Xcoco:
         self._yolo_labels_dir = None
         self._yolo_images_dir = None
         self._yolo_cfg_yaml_path = None
-        self.coco_ann_path = coco_ann_path
-        self.coco_imgs_dir = coco_imgs_dir
+        self.coco_ann_path = ann_path
+        self.coco_imgs_dir = imgs_dir
         self.output_dir = output_dir
         self.yolo_cfg_yaml_path = yolo_cfg_yaml
 
@@ -219,7 +219,7 @@ class Xcoco:
 
     def __call__(self) -> Any:
         if self.coco is None:
-            logger.error("is None")
+            logger.error("coco is None")
             return
 
         self.write_labels()
