@@ -6,7 +6,7 @@ import os
 import shutil
 from typing import Any, Optional
 
-import yaml
+import oyaml as yaml
 from loguru import logger
 from pycocotools.coco import COCO
 
@@ -211,7 +211,19 @@ class Xcoco:
         """
         write yaml file
         """
-        yaml_content_dict = {"path": "", "train": "", "test": None, "names": ""}
+        if os.path.exists(self.yolo_cfg_yaml_path):
+            with open(
+                self.yolo_cfg_yaml_path, "r", encoding="UTF-8"
+            ) as f_handler:
+                yaml_content_dict = yaml.load(f_handler, Loader=yaml.FullLoader)
+        else:
+            yaml_content_dict = {
+                "path": "",
+                "train": "",
+                "test": None,
+                "names": "",
+            }
+
         yaml_content_dict["names"] = {
             int(self._coco.cats[cid]["id"]) - 1: self._coco.cats[cid]["name"]
             for cid in self._coco.getCatIds()
