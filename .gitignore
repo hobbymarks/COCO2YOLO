@@ -3,3 +3,5 @@ dist/
 *.spec
 .ipynb_checkpoints/
 *.pyc
+.coverage
+coverage.xml
