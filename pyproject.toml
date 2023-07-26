@@ -19,6 +19,7 @@ fire = "^0.5.0"
 pytest = "^7.4.0"
 coverage = "^7.2.7"
 loguru = "^0.7.0"
+oyaml = "^1.0"
 
 
 [build-system]

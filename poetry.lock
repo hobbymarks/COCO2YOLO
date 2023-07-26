@@ -1605,6 +1605,20 @@ files = [
 ]
 
 [[package]]
+name = "oyaml"
+version = "1.0"
+description = "Ordered YAML: drop-in replacement for PyYAML which preserves dict ordering"
+optional = false
+python-versions = "*"
+files = [
+    {file = "oyaml-1.0-py2.py3-none-any.whl", hash = "sha256:3a378747b7fb2425533d1ce41962d6921cda075d46bb480a158d45242d156323"},
+    {file = "oyaml-1.0.tar.gz", hash = "sha256:ed8fc096811f4763e1907dce29c35895d6d5936c4d0400fe843a91133d4744ed"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+
+[[package]]
 name = "packaging"
 version = "23.1"
 description = "Core utilities for Python packages"
@@ -2664,4 +2678,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "3a17a1eeae0afd33ca828a10a06980a0fa6ff91d197dcfabda41b4fd51df04c6"
+content-hash = "82d6faba0fbc4a4be1eb048fd0e8ad443526af3e6f19c9b208ca3680d0223835"
