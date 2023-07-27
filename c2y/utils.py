@@ -4,6 +4,7 @@ utils.py
 
 import os
 import shutil
+from pathlib import Path
 from typing import Any, Optional
 
 import oyaml as yaml
@@ -22,6 +23,7 @@ class Xcoco:
         imgs_dir: Optional[str] = None,
         yolo_cfg_yaml: Optional[str] = None,
         output_dir: Optional[str] = None,
+        force: bool = False,
     ) -> None:
         self._coco = None
         self._coco_ann_path = None
@@ -30,6 +32,7 @@ class Xcoco:
         self._yolo_labels_dir = None
         self._yolo_images_dir = None
         self._yolo_cfg_yaml_path = None
+        self._force = force
         self.coco_ann_path = ann_path
         self.coco_imgs_dir = imgs_dir
         self.output_dir = output_dir
@@ -100,7 +103,9 @@ class Xcoco:
                 logger.warning(f"Path exist, be overwritten:{cfg_yaml_path}")
             self._yolo_cfg_yaml_path = cfg_yaml_path
         else:
-            self._yolo_cfg_yaml_path = os.path.join(self.output_dir, "yolo.yml")
+            self._yolo_cfg_yaml_path = os.path.join(
+                self.output_dir, "yolo.yml"
+            )
 
     @property
     def output_dir(self):
@@ -168,12 +173,35 @@ class Xcoco:
 
         return out_text
 
+    def _prepare_dataset_dir(self, dir_path) -> bool:
+        if not os.path.exists(dir_path):  # not exist
+            os.mkdir(dir_path)
+            return True
+        # exist
+        if not Path(dir_path).is_dir():  # exist but not dir
+            logger.error(f"Not Directory:{dir_path}")
+            return False
+
+        if self._force is True:  # exist and is dir and force is True
+            logger.trace(f"force is {self._force}")
+            shutil.rmtree(dir_path)
+            os.mkdir(dir_path)
+            return True
+        # exist and is dir and force is False
+        _in = input("overwrite exist.yes/(no)?")
+        if _in.lower() == "y" or _in.lower() == "yes":  # input yes
+            shutil.rmtree(dir_path)
+            os.mkdir(dir_path)
+            return True
+
+        return False
+
     def write_labels(self):
         """
         write labels to files
         """
-        if not os.path.exists(self._yolo_labels_dir):
-            os.mkdir(self._yolo_labels_dir)
+        if not self._prepare_dataset_dir(self._yolo_labels_dir):
+            return
 
         for img_id in self._coco.getImgIds():
             fname = (
@@ -194,12 +222,14 @@ class Xcoco:
         """
         write images to yolo datasets
         """
-        if self.coco_imgs_dir is None or not os.path.exists(self.coco_imgs_dir):
-            logger.error("images directory path not set")
+        if self.coco_imgs_dir is None or not os.path.exists(
+            self.coco_imgs_dir
+        ):
+            logger.error("coco images directory not set")
             return
 
-        if not os.path.exists(self._yolo_images_dir):
-            os.mkdir(self._yolo_images_dir)
+        if not self._prepare_dataset_dir(self._yolo_images_dir):
+            return
 
         for img_id in self._coco.getImgIds():
             source_path = os.path.join(
@@ -215,7 +245,9 @@ class Xcoco:
             with open(
                 self.yolo_cfg_yaml_path, "r", encoding="UTF-8"
             ) as f_handler:
-                yaml_content_dict = yaml.load(f_handler, Loader=yaml.FullLoader)
+                yaml_content_dict = yaml.load(
+                    f_handler, Loader=yaml.FullLoader
+                )
         else:
             yaml_content_dict = {
                 "path": "",
