@@ -99,8 +99,6 @@ class Xcoco:
         set yolo yaml config path
         """
         if cfg_yaml_path is not None:
-            if os.path.exists(cfg_yaml_path):
-                logger.warning(f"Path exist, be overwritten:{cfg_yaml_path}")
             self._yolo_cfg_yaml_path = cfg_yaml_path
         else:
             self._yolo_cfg_yaml_path = os.path.join(
@@ -188,7 +186,7 @@ class Xcoco:
             os.mkdir(dir_path)
             return True
         # exist and is dir and force is False
-        _in = input("overwrite exist.yes/(no)?")
+        _in = input(f"{dir_path} exist.\nare you surce to overwrite?yes/(no)")
         if _in.lower() == "y" or _in.lower() == "yes":  # input yes
             shutil.rmtree(dir_path)
             os.mkdir(dir_path)
@@ -242,6 +240,12 @@ class Xcoco:
         write yaml file
         """
         if os.path.exists(self.yolo_cfg_yaml_path):
+            _in = input(
+                f"{self.yolo_cfg_yaml_path} exist.\nare you sure to overwrite? yes/(no)"
+            )
+            if _in.lower() != "y" and _in.lower() != "yes":  # input not yes
+                return
+
             with open(
                 self.yolo_cfg_yaml_path, "r", encoding="UTF-8"
             ) as f_handler:

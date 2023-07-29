@@ -119,6 +119,7 @@ def test_xcoco(mocker):
     assert xcoco.coco_imgs_dir is not None
     assert xcoco.yolo_labels_dir is not None
     assert xcoco.yolo_images_dir is not None
+    mocker.patch("builtins.input", side_effect=["yes", "yes", "yes"])
     xcoco()
     assert os.path.exists(xcoco.yolo_labels_dir) is True
     # if os.path.exists(xcoco.yolo_labels_dir):
@@ -146,6 +147,7 @@ def test_xcoco(mocker):
     assert xcoco.coco_imgs_dir is not None
     assert xcoco.yolo_labels_dir is not None
     assert xcoco.yolo_images_dir is not None
+    mocker.patch("builtins.input", side_effect=["yes", "yes", "yes"])
     xcoco()
     assert os.path.exists(xcoco.yolo_labels_dir) is True
     # if os.path.exists(xcoco.yolo_labels_dir):
@@ -172,7 +174,7 @@ def test_xcoco(mocker):
     assert xcoco.coco_imgs_dir is not None
     assert xcoco.yolo_labels_dir is not None
     assert xcoco.yolo_images_dir is not None
-    mocker.patch("builtins.input", return_value="yes")
+    mocker.patch("builtins.input", side_effect=["yes", "yes", "yes"])
     xcoco()
     assert os.path.exists(xcoco.yolo_labels_dir) is True
     if os.path.exists(xcoco.yolo_labels_dir):
