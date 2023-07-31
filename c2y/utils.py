@@ -4,12 +4,18 @@ utils.py
 
 import os
 import shutil
+import tempfile
+import zipfile
 from pathlib import Path
 from typing import Any, Optional
 
+import magic
 import oyaml as yaml
 from loguru import logger
 from pycocotools.coco import COCO
+
+COCO_ANN_DIR = "annotations"
+COCO_IMGS_DIR = "images"
 
 
 class Xcoco:
@@ -57,13 +63,50 @@ class Xcoco:
         """
         set annoation file path
         """
+
+        def _mimetype(fpath):
+            m_obj = magic.Magic(mime=True)
+            return m_obj.from_file(fpath)
+
+        def _ann_name(files):
+            _anns = [f for f in files if f.startswith(COCO_ANN_DIR)]
+            if len(_anns) == 1:
+                return _anns[0]
+            return None
+
+        def _imgs_name(files):
+            _imgs = [f for f in files if f.startswith(COCO_IMGS_DIR)]
+            if len(_imgs) > 0:
+                return _imgs
+            return None
+
         if (
             ann_path is not None
             and os.path.exists(ann_path)
             and os.path.isfile(ann_path)
         ):
-            self._coco_ann_path = ann_path
-            self._coco = COCO(self._coco_ann_path)
+            _mime = str(_mimetype(ann_path))
+            if _mime == "application/zip":  # if zip
+                _temp_dir = tempfile.gettempdir()
+                with zipfile.ZipFile(ann_path, "r") as zip_ref:
+                    _z_names = zip_ref.namelist()
+                    if (_ann := _ann_name(_z_names)) is not None:
+                        zip_ref.extract(
+                            _ann, path=_temp_dir
+                        )  # set coco annotations path
+                        self._coco_ann_path = os.path.join(_temp_dir, _ann)
+                        self._coco = COCO(self._coco_ann_path)
+                        if (self.coco_imgs_dir is None) and (
+                            (_imgs := _imgs_name(_z_names)) is not None
+                        ):  # set coco images directory
+                            for f_name in _imgs:
+                                zip_ref.extract(f_name, _temp_dir)
+                            self.coco_imgs_dir = os.path.join(
+                                _temp_dir, COCO_IMGS_DIR
+                            )
+            elif _mime == "application/json":  # if json
+                self._coco_ann_path = ann_path
+                self._coco = COCO(self._coco_ann_path)
 
     @property
     def coco_imgs_dir(self):

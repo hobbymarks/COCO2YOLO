@@ -185,3 +185,50 @@ def test_xcoco(mocker):
     assert os.path.exists(xcoco.yolo_cfg_yaml_path) is True
     if os.path.exists(xcoco.yolo_cfg_yaml_path):
         os.remove(xcoco.yolo_cfg_yaml_path)
+
+    xcoco = Xcoco(
+        ann_path=package / "edgecocos.zip",
+        yolo_cfg_yaml=package / "edgecocos.yaml",
+        output_dir=package / "edgeyolos",
+    )
+    assert xcoco.coco_ann_path is not None
+    assert xcoco.output_dir is not None
+    assert xcoco.coco is not None
+    assert xcoco.coco_imgs_dir is not None
+    assert xcoco.yolo_labels_dir is not None
+    assert xcoco.yolo_images_dir is not None
+    mocker.patch("builtins.input", side_effect=["yes", "yes", "yes"])
+    xcoco()
+    assert os.path.exists(xcoco.yolo_labels_dir) is True
+    if os.path.exists(xcoco.yolo_labels_dir):
+        shutil.rmtree(xcoco.yolo_labels_dir)
+    assert os.path.exists(xcoco.yolo_images_dir) is True
+    if os.path.exists(xcoco.yolo_images_dir):
+        shutil.rmtree(xcoco.yolo_images_dir)
+    assert os.path.exists(xcoco.yolo_cfg_yaml_path) is True
+    if os.path.exists(xcoco.yolo_cfg_yaml_path):
+        os.remove(xcoco.yolo_cfg_yaml_path)
+
+    xcoco = Xcoco(
+        ann_path=package / "edgecocos.zip",
+        imgs_dir=package / "edgeshots" / "images",
+        yolo_cfg_yaml=package / "edgecocos.yaml",
+        output_dir=package / "edgeyolos",
+    )
+    assert xcoco.coco_ann_path is not None
+    assert xcoco.output_dir is not None
+    assert xcoco.coco is not None
+    assert xcoco.coco_imgs_dir is not None
+    assert xcoco.yolo_labels_dir is not None
+    assert xcoco.yolo_images_dir is not None
+    mocker.patch("builtins.input", side_effect=["yes", "yes", "yes"])
+    xcoco()
+    assert os.path.exists(xcoco.yolo_labels_dir) is True
+    if os.path.exists(xcoco.yolo_labels_dir):
+        shutil.rmtree(xcoco.yolo_labels_dir)
+    assert os.path.exists(xcoco.yolo_images_dir) is True
+    if os.path.exists(xcoco.yolo_images_dir):
+        shutil.rmtree(xcoco.yolo_images_dir)
+    assert os.path.exists(xcoco.yolo_cfg_yaml_path) is True
+    if os.path.exists(xcoco.yolo_cfg_yaml_path):
+        os.remove(xcoco.yolo_cfg_yaml_path)
