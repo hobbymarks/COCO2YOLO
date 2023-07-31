@@ -23,6 +23,7 @@ oyaml = "^1.0"
 pytest-mock = "^3.11.1"
 plotly-express = "^0.4.1"
 ipywidgets = "^8.0.7"
+mimetypes-magic = "^0.4.30"
 
 
 [build-system]
