@@ -21,7 +21,10 @@ def signal_handler(sig, frame):
         logger.info(f"Signal:{sig}")
 
 
-if __name__ == "__main__":
+def main_entry():
+    """
+    main entry
+    """
     logger.remove()
     # Log to file, rotate at 10 MB
     logger.add("logs/c2y_log.log", level="TRACE", rotation="1 MB")
@@ -29,3 +32,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
 
     fire.Fire(Xcoco)
+
+
+if __name__ == "__main__":
+    main_entry()
