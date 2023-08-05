@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "c2y"
-version = "0.1.2"
+version = "0.1.3"
 description = "Convert coco datasets to yolo datasets"
 authors = ["hobbymarks <ihobbymarks@gmail.com>"]
 readme = "README.md"
@@ -16,6 +16,9 @@ loguru = "^0.7.0"
 oyaml = "^1.0"
 pytest-mock = "^3.11.1"
 mimetypes-magic = "^0.4.30"
+
+[tool.poetry.scripts]
+c2y = "pytho -m c2y"
 
 
 [build-system]
