@@ -2,10 +2,12 @@
 utils.py
 """
 
+import io
 import os
 import shutil
 import tempfile
 import zipfile
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Any, Optional
 
@@ -16,6 +18,30 @@ from pycocotools.coco import COCO
 
 COCO_ANN_DIR = "annotations"
 COCO_IMGS_DIR = "images"
+
+
+def capture_logger(func):
+    """
+    capture stdout and stderr to log
+    """
+
+    def wrapper(*args, **kwargs):
+        # Create file-like objects
+        stdout_stream = io.StringIO()
+        stderr_stream = io.StringIO()
+
+        # Redirect stdout and stderr
+        with redirect_stdout(stdout_stream), redirect_stderr(stderr_stream):
+            # Call the function
+            func(*args, **kwargs)
+
+        # Log output
+        if (_stdout := stdout_stream.getvalue()) != "":
+            logger.trace(f"{_stdout}")
+        if (_stderr := stderr_stream.getvalue()) != "":
+            logger.trace(f"{_stderr}")
+
+    return wrapper
 
 
 class Xcoco:
@@ -80,6 +106,12 @@ class Xcoco:
                 return _imgs
             return None
 
+        @capture_logger
+        def _load_coco(ann_path: str):
+            self._coco_ann_path = ann_path
+            logger.trace(f"Set COCO ann path:{self._coco_ann_path}")
+            self._coco = COCO(self._coco_ann_path)
+
         if (
             ann_path is not None
             and os.path.exists(ann_path)
@@ -94,8 +126,7 @@ class Xcoco:
                         zip_ref.extract(
                             _ann, path=_temp_dir
                         )  # set coco annotations path
-                        self._coco_ann_path = os.path.join(_temp_dir, _ann)
-                        self._coco = COCO(self._coco_ann_path)
+                        _load_coco(os.path.join(_temp_dir, _ann))
                         if (self.coco_imgs_dir is None) and (
                             (_imgs := _imgs_name(_z_names)) is not None
                         ):  # set coco images directory
@@ -105,8 +136,7 @@ class Xcoco:
                                 _temp_dir, COCO_IMGS_DIR
                             )
             elif _mime == "application/json":  # if json
-                self._coco_ann_path = ann_path
-                self._coco = COCO(self._coco_ann_path)
+                _load_coco(ann_path)
 
     @property
     def coco_imgs_dir(self):
@@ -125,6 +155,7 @@ class Xcoco:
         """
         if coco_imgs_dir is not None and os.path.isdir(coco_imgs_dir):
             self._coco_imgs_dir = coco_imgs_dir
+            logger.trace(f"Set COCO images dir:{self._coco_imgs_dir}")
 
     @property
     def yolo_cfg_yaml_path(self):
@@ -147,6 +178,7 @@ class Xcoco:
             self._yolo_cfg_yaml_path = os.path.join(
                 self.output_dir, "yolo.yml"
             )
+        logger.trace(f"Set YOLO config yaml path:{self._yolo_cfg_yaml_path}")
 
     @property
     def output_dir(self):
@@ -162,8 +194,10 @@ class Xcoco:
         """
         if output_dir is None:
             self._output_dir = "./"
+            logger.trace(f"Set Output dir:{self._output_dir}")
         elif os.path.isdir(output_dir):
             self._output_dir = output_dir
+            logger.trace(f"Set Output dir:{self._output_dir}")
         else:
             raise Exception(f"{output_dir}")
 
@@ -252,12 +286,14 @@ class Xcoco:
             _txt = self._img_to_labels(img_id=img_id)
             if _txt == "":
                 continue
+            _f_label = os.path.join(self._yolo_labels_dir, fname)
             with open(
-                os.path.join(self._yolo_labels_dir, fname),
+                _f_label,
                 "w",
                 encoding="UTF-8",
             ) as f_handler:
                 f_handler.write(_txt)
+                logger.trace(f"Writle label file:{_f_label}")
 
     def write_images(self):
         """
@@ -277,17 +313,21 @@ class Xcoco:
                 self._coco_imgs_dir, self._coco.imgs[img_id]["file_name"]
             )
             shutil.copy(source_path, self._yolo_images_dir)
+            logger.trace(f"Copy image file:{source_path}")
 
     def write_yaml(self):
         """
         write yaml file
         """
         if os.path.exists(self.yolo_cfg_yaml_path):
-            _in = input(
-                f"{self.yolo_cfg_yaml_path} exist.\nare you sure to overwrite? yes/(no)"
-            )
-            if _in.lower() != "y" and _in.lower() != "yes":  # input not yes
-                return
+            if self._force is not True:
+                _in = input(
+                    f"{self.yolo_cfg_yaml_path} exist.\nare you sure to overwrite? yes/(no)"
+                )
+                if (
+                    _in.lower() != "y" and _in.lower() != "yes"
+                ):  # input not yes
+                    return
 
             with open(
                 self.yolo_cfg_yaml_path, "r", encoding="UTF-8"
@@ -310,6 +350,7 @@ class Xcoco:
 
         with open(self.yolo_cfg_yaml_path, "w", encoding="UTF-8") as f_handler:
             yaml.dump(yaml_content_dict, f_handler)
+            logger.trace(f"Write yolo config file:{self.yolo_cfg_yaml_path}")
 
     def __call__(self) -> Any:
         if self.coco is None:
