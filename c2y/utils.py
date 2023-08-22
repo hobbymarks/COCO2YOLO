@@ -1,4 +1,4 @@
-"""
+"""@package c2y
 utils.py
 """
 
@@ -23,6 +23,8 @@ COCO_IMGS_DIR = "images"
 def capture_logger(func):
     """
     capture stdout and stderr to log
+    @parameters:
+        func:the function whoes log will be captured
     """
 
     def wrapper(*args, **kwargs):
@@ -46,7 +48,7 @@ def capture_logger(func):
 
 class Xcoco:
     """
-    Xcoco
+    Xcoco is all for operation to coco class
     """
 
     def __init__(
@@ -88,6 +90,8 @@ class Xcoco:
     def coco_ann_path(self, ann_path: str):
         """
         set annoation file path
+        @parameters:
+            ann_path: annotaion file path
         """
 
         def _mimetype(fpath):
@@ -152,6 +156,8 @@ class Xcoco:
     ):
         """
         set images directory path
+        @parameters:
+            coco_imgs_dir:coco images directory path
         """
         if coco_imgs_dir is not None and os.path.isdir(coco_imgs_dir):
             self._coco_imgs_dir = coco_imgs_dir
@@ -171,6 +177,8 @@ class Xcoco:
     ):
         """
         set yolo yaml config path
+        @parameters:
+            cfg_yaml_path:yaml configuration file path
         """
         if cfg_yaml_path is not None:
             self._yolo_cfg_yaml_path = cfg_yaml_path
@@ -191,6 +199,8 @@ class Xcoco:
     def output_dir(self, output_dir: Optional[str] = None):
         """
         set output directory path
+        @parameters:
+            output_dir:output directory path
         """
         if output_dir is None:
             self._output_dir = "./"
@@ -353,6 +363,9 @@ class Xcoco:
             logger.trace(f"Write yolo config file:{self.yolo_cfg_yaml_path}")
 
     def __call__(self) -> Any:
+        """
+        class directly call
+        """
         if self.coco is None:
             logger.error("coco is None")
             return

@@ -1,4 +1,4 @@
-"""
+"""@package c2y
 main entry
 """
 import signal
@@ -13,6 +13,9 @@ from c2y import Xcoco
 def signal_handler(sig, frame):
     """
     signal handler
+    @parameters:
+        sig:the received signal
+        frame:the received frame
     """
     if sig == signal.SIGINT:
         logger.info(f"Func:{frame.f_code.co_name},CodeLine:{frame.f_lineno}")
